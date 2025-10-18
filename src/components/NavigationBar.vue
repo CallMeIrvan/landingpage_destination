@@ -8,35 +8,51 @@
         </div>
       </div>
 
-      <div class="navbar__menu" :class="{ 'navbar__menu--active': isMenuOpen }">
-        <a href="#home" class="navbar__link" @click="closeMenu">
-          <span class="navbar__link-text">Beranda</span>
-          <div class="navbar__link-indicator"></div>
-        </a>
-        <a href="#culture" class="navbar__link" @click="closeMenu">
-          <span class="navbar__link-text">Budaya</span>
-          <div class="navbar__link-indicator"></div>
-        </a>
-        <a href="#attractions" class="navbar__link" @click="closeMenu">
-          <span class="navbar__link-text">Destinasi</span>
-          <div class="navbar__link-indicator"></div>
-        </a>
-        <a href="#gallery" class="navbar__link" @click="closeMenu">
-          <span class="navbar__link-text">Galeri</span>
-          <div class="navbar__link-indicator"></div>
-        </a>
-        <a href="#testimonials" class="navbar__link" @click="closeMenu">
-          <span class="navbar__link-text">Testimoni</span>
-          <div class="navbar__link-indicator"></div>
-        </a>
-        <a href="#contact" class="navbar__link" @click="closeMenu">
-          <span class="navbar__link-text">Kontak</span>
-          <div class="navbar__link-indicator"></div>
-        </a>
+      <div class="navbar__right-group">
+        <div class="navbar__menu" :class="{ 'navbar__menu--active': isMenuOpen }">
+          <a href="#home" class="navbar__link" @click="closeMenu">
+            <span class="navbar__link-text">Beranda</span>
+            <div class="navbar__link-indicator"></div>
+          </a>
+          <a href="#culture" class="navbar__link" @click="closeMenu">
+            <span class="navbar__link-text">Budaya</span>
+            <div class="navbar__link-indicator"></div>
+          </a>
+          <a href="#attractions" class="navbar__link" @click="closeMenu">
+            <span class="navbar__link-text">Destinasi</span>
+            <div class="navbar__link-indicator"></div>
+          </a>
+          <a href="#gallery" class="navbar__link" @click="closeMenu">
+            <span class="navbar__link-text">Galeri</span>
+            <div class="navbar__link-indicator"></div>
+          </a>
+          <a href="#testimonials" class="navbar__link" @click="closeMenu">
+            <span class="navbar__link-text">Testimoni</span>
+            <div class="navbar__link-indicator"></div>
+          </a>
+          <a href="#contact" class="navbar__link" @click="closeMenu">
+            <span class="navbar__link-text">Kontak</span>
+            <div class="navbar__link-indicator"></div>
+          </a>
 
-        <!-- Mobile CTA Button -->
-        <div class="navbar__mobile-cta">
-          <button class="navbar__cta navbar__cta--mobile" @click="scrollToContact">
+          <div class="navbar__mobile-cta">
+            <button class="navbar__cta navbar__cta--mobile" @click="scrollToContact">
+              <span>Pesan Sekarang</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M5 12H19M19 12L12 5M19 12L12 19"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="navbar__actions">
+          <button class="navbar__cta navbar__cta--desktop" @click="scrollToContact">
             <span>Pesan Sekarang</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path
@@ -48,38 +64,20 @@
               />
             </svg>
           </button>
-        </div>
-      </div>
 
-      <div class="navbar__actions">
-        <!-- Desktop CTA Button -->
-        <button class="navbar__cta navbar__cta--desktop" @click="scrollToContact">
-          <span>Pesan Sekarang</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M5 12H19M19 12L12 5M19 12L12 19"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-
-        <!-- Hamburger Menu -->
-        <div
-          class="navbar__hamburger"
-          :class="{ 'navbar__hamburger--active': isMenuOpen }"
-          @click="toggleMenu"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
+          <div
+            class="navbar__hamburger"
+            :class="{ 'navbar__hamburger--active': isMenuOpen }"
+            @click="toggleMenu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Mobile Menu Overlay -->
     <div
       class="navbar__overlay"
       :class="{ 'navbar__overlay--active': isMenuOpen }"
@@ -219,6 +217,12 @@ const scrollToContact = () => {
   align-items: center;
   gap: 0.5rem;
   letter-spacing: 0.5px;
+}
+
+.navbar__right-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Memberi jarak antara menu dan tombol 'Pesan Sekarang' */
 }
 
 .navbar__link::before {
