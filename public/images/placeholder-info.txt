@@ -1,0 +1,50 @@
+# 📸 Informasi Gambar Placeholder
+
+## 🎯 **Untuk Testing:**
+
+Jika Anda ingin menggunakan gambar placeholder sementara untuk testing, Anda bisa:
+
+1. **Download gambar dari Unsplash** dengan resolusi yang sesuai
+2. **Rename sesuai dengan nama file yang dibutuhkan**
+3. **Simpan di folder yang sesuai**
+
+## 📋 **Daftar File yang Dibutuhkan:**
+
+### Hero Section:
+- `sumba-landscape-main.jpg` (1920x1080px)
+
+### Culture Section:
+- `pasola-ritual.jpg` (800x600px)
+- `tenun-ikat.jpg` (800x600px)
+- `rumah-adat.jpg` (800x600px)
+- `tarian-tradisional.jpg` (800x600px)
+- `megalitik.jpg` (800x600px)
+- `upacara-adat.jpg` (800x600px)
+
+### Attractions Section:
+- `pantai-walakiri.jpg` (800x600px)
+- `desa-ratenggaro.jpg` (800x600px)
+- `air-terjun-lapopu.jpg` (800x600px)
+- `bukit-wairinding.jpg` (800x600px)
+- `museum-sumba.jpg` (800x600px)
+- `pantai-puru-kambera.jpg` (800x600px)
+
+### Gallery Section:
+- `gallery-1.jpg` sampai `gallery-12.jpg` (berbagai ukuran)
+
+### Testimonials Section:
+- `avatar-1.jpg` sampai `avatar-6.jpg` (300x300px)
+
+## 🔗 **Link Download Gambar Sumba:**
+
+1. **Hero Background**: https://unsplash.com/photos/landscape-sumba
+2. **Culture Images**: https://unsplash.com/photos/sumba-culture
+3. **Attractions**: https://unsplash.com/photos/sumba-tourism
+4. **Gallery**: https://unsplash.com/photos/sumba-gallery
+
+## ⚡ **Tips:**
+
+- Gunakan format JPG untuk foto
+- Kompres gambar untuk performa yang lebih baik
+- Pastikan resolusi minimal sesuai rekomendasi
+- Test di browser untuk memastikan gambar muncul dengan benar
