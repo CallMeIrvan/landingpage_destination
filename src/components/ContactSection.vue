@@ -224,6 +224,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { addOrder } from '../services/orderService'
 
 const isSubmitting = ref(false)
 
@@ -263,6 +264,22 @@ const submitForm = async () => {
     // Simulasi pengiriman form
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
+    // Simpan pesanan ke Firebase
+    const orderData = {
+      name: form.value.name,
+      email: form.value.email,
+      phone: form.value.phone,
+      country: form.value.country,
+      package: form.value.package,
+      participants: form.value.participants,
+      startDate: form.value.startDate,
+      endDate: form.value.endDate,
+      interests: form.value.interests,
+      message: form.value.message,
+    }
+
+    const result = await addOrder(orderData)
+
     // Reset form
     form.value = {
       name: '',
@@ -278,9 +295,10 @@ const submitForm = async () => {
     }
 
     alert(
-      'Terima kasih! Pesanan Anda telah berhasil dikirim. Tim kami akan menghubungi Anda dalam 24 jam.',
+      `Terima kasih! Pesanan Anda telah berhasil dikirim dengan ID #${result.id}. Tim kami akan menghubungi Anda dalam 24 jam.`,
     )
   } catch (error) {
+    console.error('Error submitting order:', error)
     alert('Maaf, terjadi kesalahan. Silakan coba lagi.')
   } finally {
     isSubmitting.value = false
