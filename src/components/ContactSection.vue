@@ -71,7 +71,7 @@
               </svg>
             </div>
             <h3>Hubungi Kami</h3>
-            <p>+62 812-3456-7890<br />info@sumbaculture.com<br />booking@sumbaculture.com</p>
+            <p>0821-3514-6105<br />info@sumbaculture.com<br />booking@sumbaculture.com</p>
           </div>
         </div>
 
@@ -112,7 +112,7 @@
                   id="phone"
                   v-model="form.phone"
                   required
-                  placeholder="+62 812-3456-7890"
+                  placeholder="082135146105"
                 />
               </div>
 

@@ -7,7 +7,7 @@ import GallerySection from '../components/GallerySection.vue'
 import TestimonialsSection from '../components/TestimonialsSection.vue'
 import ContactSection from '../components/ContactSection.vue'
 import NavigationBar from '../components/NavigationBar.vue'
-import Footer from '../components/Footer.vue'
+import AppFooter from '../components/AppFooter.vue'
 
 const isScrolled = ref(false)
 
@@ -27,13 +27,19 @@ onMounted(() => {
     <GallerySection />
     <TestimonialsSection />
     <ContactSection />
-    <Footer />
+    <AppFooter />
   </div>
 </template>
 
 <style scoped>
 .landing-page {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   line-height: 1.6;
   color: #333;
 }

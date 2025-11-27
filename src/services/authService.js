@@ -4,8 +4,10 @@ import {
   signOut,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
+  getAuth,
 } from 'firebase/auth'
-import { auth } from '../config/firebase'
+import { initializeApp, deleteApp } from 'firebase/app'
+import { auth, firebaseConfig } from '../config/firebase'
 import {
   createAdminWithRole,
   isAdmin,
@@ -94,6 +96,28 @@ export const createAdmin = async (email, password, role = ADMIN_ROLES.ADMIN) => 
   }
 }
 
+// Memperbaiki admin yang sudah ada di Auth tapi belum ada di Firestore
+export const restoreAdminAccess = async (email, password) => {
+  try {
+    // Login dulu untuk dapatkan UID
+    const userCredential = await signInWithEmailAndPassword(auth, email, password)
+    const user = userCredential.user
+
+    // Buat ulang data admin di Firestore
+    const adminData = await createAdminWithRole(user.uid, email, ADMIN_ROLES.SUPER_ADMIN)
+
+    return {
+      uid: user.uid,
+      email: user.email,
+      role: adminData.role,
+      permissions: adminData.permissions,
+    }
+  } catch (error) {
+    console.error('Error restoring admin access:', error)
+    throw error
+  }
+}
+
 // Cek apakah user saat ini adalah admin
 export const checkCurrentUserIsAdmin = async () => {
   try {
@@ -117,5 +141,41 @@ export const getCurrentAdminData = async () => {
   } catch (error) {
     console.error('Error getting current admin data:', error)
     return null
+  }
+}
+
+// Membuat admin baru tanpa logout (menggunakan secondary app)
+export const createAdminWithoutLogout = async (email, password, role = ADMIN_ROLES.ADMIN) => {
+  let secondaryApp = null
+  try {
+    // Validasi email admin
+    if (!isValidAdminEmail(email)) {
+      throw new Error('Email harus menggunakan domain admin yang valid')
+    }
+
+    // Initialize secondary app
+    secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp')
+    const secondaryAuth = getAuth(secondaryApp)
+
+    // Create user in secondary app
+    const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password)
+    const user = userCredential.user
+
+    // Create admin data in Firestore (using main app's db connection)
+    const adminData = await createAdminWithRole(user.uid, email, role)
+
+    return {
+      uid: user.uid,
+      email: user.email,
+      role: adminData.role,
+      permissions: adminData.permissions,
+    }
+  } catch (error) {
+    console.error('Error creating admin without logout:', error)
+    throw error
+  } finally {
+    if (secondaryApp) {
+      await deleteApp(secondaryApp)
+    }
   }
 }

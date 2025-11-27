@@ -33,7 +33,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="footer__section">
           <h4>Destinasi</h4>
           <ul class="footer__links">
@@ -44,7 +44,7 @@
             <li><a href="#attractions">Pantai Puru Kambera</a></li>
           </ul>
         </div>
-        
+
         <div class="footer__section">
           <h4>Budaya</h4>
           <ul class="footer__links">
@@ -55,7 +55,7 @@
             <li><a href="#culture">Upacara Adat</a></li>
           </ul>
         </div>
-        
+
         <div class="footer__section">
           <h4>Informasi</h4>
           <ul class="footer__links">
@@ -67,10 +67,10 @@
           </ul>
         </div>
       </div>
-      
+
       <div class="footer__bottom">
         <div class="footer__bottom-content">
-          <p>&copy; 2024 Sumba Culture. Semua hak dilindungi undang-undang.</p>
+          <p>&copy; 2025 Sumba Culture. Semua hak dilindungi undang-undang.</p>
           <div class="footer__bottom-links">
             <a href="#">Kebijakan Privasi</a>
             <a href="#">Syarat & Ketentuan</a>
@@ -230,16 +230,16 @@
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  
+
   .footer__section--main {
     max-width: none;
   }
-  
+
   .footer__bottom-content {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .footer__bottom-links {
     justify-content: center;
   }
@@ -249,11 +249,11 @@
   .footer {
     padding: 3rem 0 0;
   }
-  
+
   .footer__container {
     padding: 0 1rem;
   }
-  
+
   .footer__bottom-links {
     flex-direction: column;
     gap: 1rem;

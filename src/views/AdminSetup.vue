@@ -15,7 +15,10 @@
               id="email"
               v-model="adminForm.email"
               placeholder="admin@sumbaculture.com"
+              disabled
+              class="admin-setup__input--disabled"
             />
+            <small class="admin-setup__hint">Email admin dikunci untuk keamanan</small>
           </div>
 
           <div class="admin-setup__form-group">
@@ -28,7 +31,7 @@
             />
           </div>
 
-          <button @click="createAdmin" class="admin-setup__button" :disabled="isLoading">
+          <button @click="createAdminUser" class="admin-setup__button" :disabled="isLoading">
             <span v-if="!isLoading">Buat Admin User</span>
             <span v-else>Membuat...</span>
           </button>
@@ -86,7 +89,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { createAdmin } from '../services/authService'
+import { createAdmin, restoreAdminAccess } from '../services/authService'
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -110,10 +113,26 @@ const createAdminUser = async () => {
   } catch (error) {
     console.error('Error creating admin:', error)
 
+    if (
+      error.code === 'auth/email-already-in-use' ||
+      error.message.includes('email-already-in-use')
+    ) {
+      try {
+        // Coba perbaiki akses admin jika user sudah ada
+        const user = await restoreAdminAccess(adminForm.value.email, adminForm.value.password)
+        createdUser.value = user
+        isCreated.value = true
+        errorMessage.value = 'User sudah ada. Akses admin berhasil diperbaiki/ditambahkan!'
+        return
+      } catch (restoreError) {
+        console.error('Error restoring admin:', restoreError)
+        errorMessage.value =
+          'Email sudah digunakan. Gagal memperbaiki akses karena password salah atau error lain.'
+        return
+      }
+    }
+
     switch (error.code) {
-      case 'auth/email-already-in-use':
-        errorMessage.value = 'Email sudah digunakan. Admin user sudah ada.'
-        break
       case 'auth/invalid-email':
         errorMessage.value = 'Format email tidak valid'
         break
@@ -124,7 +143,7 @@ const createAdminUser = async () => {
         errorMessage.value = 'Email/Password authentication tidak diaktifkan di Firebase Console'
         break
       default:
-        if (error.message.includes('domain admin')) {
+        if (error.message && error.message.includes('domain admin')) {
           errorMessage.value = 'Email harus menggunakan domain admin yang valid (@sumbaculture.com)'
         } else {
           errorMessage.value = 'Terjadi kesalahan saat membuat admin user'
@@ -222,6 +241,20 @@ const reset = () => {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.admin-setup__input--disabled {
+  background-color: #e9ecef !important;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.admin-setup__hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
 }
 
 .admin-setup__button {

@@ -1,6 +1,7 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import { ref, onMounted, onUnmounted } from 'vue'
+import RambuChatWidget from './components/RambuChatWidget.vue'
 
 const alert = ref({ show: false, color: 'success', text: '' })
 
@@ -31,6 +32,7 @@ onUnmounted(() => {
       </CAlert>
     </div>
     <RouterView />
+    <RambuChatWidget />
   </div>
 </template>
 

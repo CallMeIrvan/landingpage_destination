@@ -151,17 +151,21 @@ Untuk keamanan yang lebih baik, update Firestore rules:
 1. Buka Firestore Database > Rules
 2. Ganti rules dengan:
 
-```javascript
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
+match /databases/{database}/documents {
+// Allow users to read/write their own admin data (for setup)
+match /admins/{userId} {
+allow read, write: if request.auth != null && request.auth.uid == userId;
+}
+
     // Allow read/write access to tourOrders collection for authenticated users
     match /tourOrders/{document} {
       allow read, write: if request.auth != null;
     }
-  }
+
 }
-```
+}
 
 3. Klik "Publish"
 

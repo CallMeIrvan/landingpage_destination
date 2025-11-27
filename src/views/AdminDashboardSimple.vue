@@ -8,6 +8,18 @@
         </div>
 
         <div class="admin-dashboard__actions">
+          <button
+            @click="openAdminModal"
+            class="admin-dashboard__action-btn admin-dashboard__action-btn--admin"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                fill="currentColor"
+              />
+            </svg>
+            Kelola Admin
+          </button>
           <button @click="refreshOrders" class="admin-dashboard__refresh-btn" :disabled="isLoading">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path
@@ -70,6 +82,72 @@
             </svg>
             Logout
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Management Modal -->
+    <div v-if="showAdminModal" class="admin-dashboard__modal-overlay" @click="closeAdminModal">
+      <div class="admin-dashboard__modal-card" @click.stop>
+        <div class="admin-dashboard__modal-header">
+          <h3 class="admin-dashboard__modal-title">Kelola Admin</h3>
+          <button @click="closeAdminModal" class="admin-dashboard__modal-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="admin-dashboard__modal-content">
+          <!-- Add New Admin Form -->
+          <div class="admin-dashboard__section">
+            <h4>Tambah Admin Baru</h4>
+            <div class="admin-dashboard__form-group">
+              <input
+                v-model="newAdminForm.email"
+                type="email"
+                placeholder="Email (@sumbaculture.com)"
+                class="admin-dashboard__input"
+              />
+              <input
+                v-model="newAdminForm.password"
+                type="password"
+                placeholder="Password"
+                class="admin-dashboard__input"
+              />
+              <button
+                @click="createNewAdmin"
+                class="admin-dashboard__btn-primary"
+                :disabled="isLoadingAdmins"
+              >
+                {{ isLoadingAdmins ? 'Memproses...' : 'Tambah Admin' }}
+              </button>
+            </div>
+            <p v-if="adminCreationError" class="admin-dashboard__error">{{ adminCreationError }}</p>
+            <p v-if="adminCreationSuccess" class="admin-dashboard__success">
+              {{ adminCreationSuccess }}
+            </p>
+          </div>
+
+          <!-- Admin List -->
+          <div class="admin-dashboard__section">
+            <h4>Daftar Admin</h4>
+            <div v-if="isLoadingAdmins && admins.length === 0" class="admin-dashboard__loading">
+              Memuat...
+            </div>
+            <ul v-else class="admin-dashboard__list">
+              <li v-for="admin in admins" :key="admin.uid" class="admin-dashboard__list-item">
+                <div class="admin-dashboard__list-info">
+                  <span class="admin-dashboard__list-email">{{ admin.email }}</span>
+                  <span class="admin-dashboard__list-role">{{ admin.role }}</span>
+                </div>
+                <span
+                  class="admin-dashboard__list-status"
+                  :class="{ active: admin.isActive, inactive: !admin.isActive }"
+                >
+                  {{ admin.isActive ? 'Aktif' : 'Nonaktif' }}
+                </span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -499,14 +577,9 @@
           <button
             @click="closeDetailModal"
             class="admin-dashboard__modal-btn admin-dashboard__modal-btn--cancel"
+            style="width: 100%"
           >
             Tutup
-          </button>
-          <button
-            @click="updateOrderStatusHandler(selectedOrder)"
-            class="admin-dashboard__modal-btn admin-dashboard__modal-btn--confirm"
-          >
-            Ubah Status
           </button>
         </div>
       </div>
@@ -523,6 +596,10 @@ import {
   deleteOrder as deleteOrderService,
   subscribeToOrders,
 } from '../services/orderService'
+import { createAdminWithoutLogout } from '../services/authService'
+
+import { getAllAdmins } from '../services/adminService'
+import { sendETicket } from '../services/emailService'
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -534,8 +611,19 @@ const itemsPerPage = ref(10)
 // Modal state
 const showStatusModal = ref(false)
 const showDetailModal = ref(false)
+const showAdminModal = ref(false)
 const selectedOrder = ref(null)
 const newStatus = ref('')
+
+// Admin Management State
+const admins = ref([])
+const isLoadingAdmins = ref(false)
+const newAdminForm = ref({
+  email: '',
+  password: '',
+})
+const adminCreationError = ref('')
+const adminCreationSuccess = ref('')
 
 // Computed properties
 const totalOrders = computed(() => orders.value.length)
@@ -614,8 +702,23 @@ const confirmStatusUpdate = async () => {
 
   try {
     await updateOrderStatus(selectedOrder.value.id, newStatus.value)
+
+    // Kirim E-Tiket otomatis jika status diubah menjadi 'confirmed'
+    if (newStatus.value === 'confirmed') {
+      try {
+        // Tampilkan loading atau notifikasi bahwa sedang mengirim email
+        console.log('Mengirim E-Tiket...')
+        await sendETicket(selectedOrder.value)
+        alert(`Status diperbarui & E-Tiket berhasil dikirim ke ${selectedOrder.value.email}`)
+      } catch (emailError) {
+        console.error('Gagal mengirim email:', emailError)
+        alert('Status diperbarui, tapi GAGAL mengirim E-Tiket. Cek konfigurasi EmailJS.')
+      }
+    } else {
+      console.log('Order status updated:', selectedOrder.value.id, newStatus.value)
+    }
+
     selectedOrder.value.status = newStatus.value
-    console.log('Order status updated:', selectedOrder.value.id, newStatus.value)
     closeStatusModal()
   } catch (error) {
     console.error('Error updating order status:', error)
@@ -667,9 +770,71 @@ const getStatusText = (status) => {
   return statusMap[status] || status
 }
 
-const logout = () => {
-  localStorage.removeItem('adminUser')
-  router.push('/admin/login')
+import { logoutAdmin } from '../services/authService'
+
+// ... existing imports ...
+
+const logout = async () => {
+  try {
+    await logoutAdmin()
+    router.push('/admin/login')
+  } catch (error) {
+    console.error('Logout error:', error)
+    router.push('/admin/login')
+  }
+}
+
+// Admin Management Methods
+const openAdminModal = async () => {
+  showAdminModal.value = true
+  await loadAdmins()
+}
+
+const closeAdminModal = () => {
+  showAdminModal.value = false
+  newAdminForm.value = { email: '', password: '' }
+  adminCreationError.value = ''
+  adminCreationSuccess.value = ''
+}
+
+const loadAdmins = async () => {
+  isLoadingAdmins.value = true
+  try {
+    admins.value = await getAllAdmins()
+  } catch (error) {
+    console.error('Error loading admins:', error)
+  } finally {
+    isLoadingAdmins.value = false
+  }
+}
+
+const createNewAdmin = async () => {
+  if (!newAdminForm.value.email || !newAdminForm.value.password) {
+    adminCreationError.value = 'Email dan password harus diisi'
+    return
+  }
+
+  isLoadingAdmins.value = true
+  adminCreationError.value = ''
+  adminCreationSuccess.value = ''
+
+  try {
+    await createAdminWithoutLogout(newAdminForm.value.email, newAdminForm.value.password)
+    adminCreationSuccess.value = 'Admin berhasil dibuat!'
+    newAdminForm.value = { email: '', password: '' }
+    await loadAdmins()
+  } catch (error) {
+    console.error('Error creating admin:', error)
+    if (error.code === 'auth/email-already-in-use') {
+      adminCreationError.value = 'Email sudah digunakan'
+    } else if (error.message.includes('domain admin')) {
+      adminCreationError.value = 'Email harus menggunakan domain @sumbaculture.com'
+    } else {
+      adminCreationError.value = 'Gagal membuat admin: ' + error.message
+    }
+  } finally {
+    isLoadingAdmins.value = false
+  }
 }
 
 // Lifecycle
@@ -1704,5 +1869,129 @@ onUnmounted(() => {
   .admin-dashboard__detail-group {
     padding: 1rem;
   }
+}
+</style>
+
+<style scoped>
+/* Admin Management Styles */
+.admin-dashboard__action-btn--admin {
+  background: #667eea;
+  color: white;
+  border: none;
+}
+
+.admin-dashboard__action-btn--admin:hover {
+  background: #5a6fd6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.admin-dashboard__section {
+  margin-bottom: 2rem;
+}
+
+.admin-dashboard__section h4 {
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.admin-dashboard__form-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-dashboard__input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.admin-dashboard__btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-dashboard__btn-primary:hover:not(:disabled) {
+  background: #5a6fd6;
+}
+
+.admin-dashboard__btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.admin-dashboard__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.admin-dashboard__list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-dashboard__list-item:last-child {
+  border-bottom: none;
+}
+
+.admin-dashboard__list-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-dashboard__list-email {
+  font-weight: 600;
+  color: #333;
+}
+
+.admin-dashboard__list-role {
+  font-size: 0.85rem;
+  color: #666;
+  text-transform: capitalize;
+}
+
+.admin-dashboard__list-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.admin-dashboard__list-status.active {
+  background: #e6fffa;
+  color: #2c7a7b;
+}
+
+.admin-dashboard__list-status.inactive {
+  background: #fff5f5;
+  color: #c53030;
+}
+
+.admin-dashboard__error {
+  color: #c53030;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.admin-dashboard__success {
+  color: #2f855a;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 }
 </style>

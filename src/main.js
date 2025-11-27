@@ -23,6 +23,7 @@ import {
   faPlay,
   faStar,
   faMapMarkerAlt,
+  faAngleRight,
 } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
 
@@ -37,6 +38,7 @@ library.add(
   faStar,
   faMapMarkerAlt,
   faHeartRegular,
+  faAngleRight,
 )
 
 const app = createApp(App)
